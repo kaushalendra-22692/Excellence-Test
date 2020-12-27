@@ -1,0 +1,145 @@
+Answer:1
+
+#Craete function to get the sum of given list
+def getListSum (list):
+    total = 0
+    for ele in range(0, len(list)):
+        total = total + list[ele]
+    return total;
+
+list = [11, 9, 15, 10, 5]
+print("Sum of all elements in given list: ", getListSum(list))
+
+Answer:3
+
+#Craete function to get the Consecutive Number
+def getMaxConsecutiveNumber (list, length):
+    count = 0
+    result_data = 0
+    for i in range(0, length):
+        if list[i] == 0:
+            count = 0
+        else:
+            count += 1
+            result_data = max(result_data, count)
+    return result_data
+list = [0,0,0,1,1,1,0,0,0,1,1,0,1,1,1,1,0,0,1,1];
+
+print(getMaxConsecutiveNumber(list, len(list)))
+
+
+Answer:4
+
+#Query to create the user table
+CREATE TABLE user ( user_id INT NOT NULL AUTO_INCREMENT , username VARCHAR(256) NOT NULL , pass VARCHAR(256) NOT NULL , PRIMARY KEY (user_id));
+
+#Query to create the user address table
+
+CREATE TABLE user_address ( address_id INT NOT NULL AUTO_INCREMENT , street VARCHAR(256), pincode VARCHAR(256), country VARCHAR(256), state VARCHAR(256), phone VARCHAR(256), user_id INT(255) NOT NULL, PRIMARY KEY (address_id), FOREIGN KEY (user_id) REFERENCES user(user_id));
+
+CREATE TABLE Orders (
+    O int NOT NULL,
+    OrderNumber int NOT NULL,
+    PersonID int,
+    PRIMARY KEY (OrderID),
+    FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+);
+
+#Create the POST route to add new user
+@app.route("/addUser", methods= ['POST'])
+def addUser():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="hospital"
+    )
+    mycursor = mydb.cursor()
+    if request.method == 'POST':
+        mycursor.execute("insert into user (user_id, username,pass)values(%s,%s,%s)", ('', request.json['username'], request.json['pass'], request.json['pass']))
+        mydb.commit()
+        if mycursor.rowcount == 1:
+            response = true
+        else:
+            response = false
+        mycursor.close()
+    return { "status" : response};
+
+#Create GET route to get the user list
+@app.route("/getUser", methods= ['GET'])
+def getUser():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="hospital"
+    )
+    mycursor = mydb.cursor()
+    if request.method == 'GET':
+        mycursor.execute("select * from user")
+        data = mycursor.fetchall();
+    mydb.commit()
+    mycursor.close()
+    return jsonify(data);
+
+#Craete the POST route to user login
+@app.route("/login", methods= ['POST'])
+def login():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="hospital"
+    )
+    mycursor = mydb.cursor()
+    if request.method == 'POST':
+        mycursor.execute("select * from user where user='"+request.json['username']+"' and pass='"+request.json['pass']+"'")
+        mydb.commit()
+        count = mycursor.rowcount
+        if count > 1:
+            return { "status" : true, "message": "Logged in successfully"};
+        elif count > 1:
+            return { "status" : false, "message": "Login failed"};
+        mycursor.close()
+
+#CReate the POST route to add the new address
+@app.route("/addAddress", methods= ['POST'])
+def addAddress():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="hospital"
+    )
+    mycursor = mydb.cursor()
+    if request.method == 'POST':
+        mycursor.execute("insert into user_address (address_id,street,pincode,country,state,phone,user_id)values(%s,%s,%s,%s,%s,%s,%s)", ('',request.json['street'], request.json['pincode'], request.json['country'], request.json['state'], request.json['phone'], request.json['user_id']))
+        mydb.commit()
+        if mycursor.rowcount == 1:
+            response = true
+        else:
+            response = false
+        mycursor.close()
+
+    return { "status" : response};
+
+#Create the PUT route to update the address
+@app.route("/updateAddress", methods= ['PUT'])
+def updateAddress():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="hospital"
+    )
+    mycursor = mydb.cursor()
+    if request.method == 'POST':
+        mycursor.execute ("UPDATE user_address SET street=%s, pincode=%s, country=%s, state=%s, phone=%s WHERE address_id='%s' " % (request.json['street'], request.json['pincode'], request.json['country'], request.json['state'], request.json['phone'], request.json['address_id']))
+        mydb.commit()
+        if mycursor.rowcount == 1:
+            response = true
+        else:
+            response = false
+        mycursor.close()
+
+    return { "status" : response};
